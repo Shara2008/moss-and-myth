@@ -53,11 +53,38 @@
       create() {
         this.cameras.main.setBackgroundColor('#1a2e22');
 
+        // Create animated background overlay
+        const bgOverlay = this.add.rectangle(640, 360, 1280, 720, 0x0a1410, 0.3);
+        this.tweens.add({
+          targets: bgOverlay,
+          alpha: { from: 0.3, to: 0.1 },
+          duration: 3000,
+          yoyo: true,
+          repeat: -1,
+        });
+
+        // Add floating particles (moss/spores effect)
+        const particles = this.add.particles(0x7cb342);
+        particles.createEmitter({
+          x: { min: 0, max: 1280 },
+          y: { min: -10, max: 720 },
+          speed: { min: -20, max: 20 },
+          angle: { min: 200, max: 340 },
+          scale: { start: 0.5, end: 0 },
+          lifespan: 3000,
+          gravityY: 30,
+          emitZone: {
+            source: new Phaser.Geom.Rectangle(0, -10, 1280, 20),
+          },
+        });
+        particles.emitParticleAt(640, 360, 2);
+
         if (this.textures.exists('startBg')) {
           this.add.image(640, 360, 'startBg').setDisplaySize(1280, 720);
         }
 
-        this.add.text(640, 180, 'MOSS AND MYTH', {
+        // Title with glow effect
+        const titleText = this.add.text(640, 180, 'MOSS AND MYTH', {
           fontFamily: 'Georgia, "Times New Roman", serif',
           fontSize: '64px',
           color: '#d4af37',
@@ -65,11 +92,30 @@
           strokeThickness: 6,
         }).setOrigin(0.5);
 
-        this.add.text(640, 260, 'A Tale of Shaivalapuri', {
+        // Glow/pulse effect for title
+        this.tweens.add({
+          targets: titleText,
+          scaleX: { from: 1, to: 1.05 },
+          scaleY: { from: 1, to: 1.05 },
+          duration: 2000,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+
+        const subtitleText = this.add.text(640, 260, 'A Tale of Shaivalapuri', {
           fontFamily: 'Arial, Helvetica, sans-serif',
           fontSize: '28px',
           color: '#c8d4c8',
         }).setOrigin(0.5);
+
+        // Fade in subtitle
+        this.tweens.add({
+          targets: subtitleText,
+          alpha: { from: 0, to: 1 },
+          duration: 2000,
+          delay: 500,
+        });
 
         this.clickPrompt = this.add.text(640, 580, '[ CLICK TO PLAY ]', {
           fontFamily: 'Arial, Helvetica, sans-serif',
@@ -86,8 +132,29 @@
           ease: 'Sine.easeInOut',
         });
 
+        // Mouse hover effect
+        this.clickPrompt.setInteractive({ useHandCursor: true });
+        this.clickPrompt.on('pointerover', () => {
+          this.tweens.add({
+            targets: this.clickPrompt,
+            fontSize: '28px',
+            duration: 200,
+          });
+        });
+        this.clickPrompt.on('pointerout', () => {
+          this.tweens.add({
+            targets: this.clickPrompt,
+            fontSize: '24px',
+            duration: 200,
+          });
+        });
+
         this.input.once('pointerdown', () => {
-          this.scene.start('StoryCutscene');
+          // Fade out transition
+          this.cameras.main.fadeOut(1000, 0, 0, 0);
+          this.time.delayedCall(1000, () => {
+            this.scene.start('StoryCutscene');
+          });
         });
       }
     }
@@ -100,20 +167,72 @@
       create() {
         this.cameras.main.setBackgroundColor('#1a2e22');
 
-        this.add.text(640, 320, 'Story Cutscene', {
+        // Fade in effect
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+        // Background shimmer effect
+        const bgShimmer = this.add.rectangle(640, 360, 1280, 720, 0x2d5a3d, 0.2);
+        this.tweens.add({
+          targets: bgShimmer,
+          alpha: { from: 0.2, to: 0.05 },
+          duration: 2500,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+
+        // Add floating mist particles
+        const mist = this.add.particles(0x9ccc65);
+        mist.createEmitter({
+          x: { min: 200, max: 1080 },
+          y: 400,
+          speed: { min: -15, max: 15 },
+          scale: { start: 0.3, end: 0 },
+          lifespan: 2000,
+          gravityY: -10,
+        });
+
+        const storyText = this.add.text(640, 320, 'Story Cutscene', {
           fontFamily: 'Georgia, "Times New Roman", serif',
           fontSize: '36px',
           color: '#d4af37',
         }).setOrigin(0.5);
 
-        this.add.text(640, 380, '(stub — click to continue)', {
+        // Typewriter effect simulation
+        this.tweens.add({
+          targets: storyText,
+          alpha: { from: 0, to: 1 },
+          duration: 1500,
+          delay: 300,
+        });
+
+        const continueText = this.add.text(640, 380, '(stub — click to continue)', {
           fontFamily: 'Arial, Helvetica, sans-serif',
           fontSize: '20px',
           color: '#c8d4c8',
+          alpha: 0,
         }).setOrigin(0.5);
 
+        // Delayed fade in for continue text
+        this.tweens.add({
+          targets: continueText,
+          alpha: { from: 0, to: 1 },
+          duration: 1000,
+          delay: 1800,
+          yoyo: true,
+          repeat: -1,
+          repeatDelay: 500,
+        });
+
         this.input.once('pointerdown', () => {
-          this.scene.start('HubWorld');
+          // Screen shake and fade
+          this.cameras.main.shake(300, 0.01);
+          this.time.delayedCall(300, () => {
+            this.cameras.main.fadeOut(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => {
+              this.scene.start('HubWorld');
+            });
+          });
         });
       }
     }
@@ -126,17 +245,91 @@
       create() {
         this.cameras.main.setBackgroundColor('#1a2e22');
 
-        this.add.text(640, 320, 'Hub World', {
+        // Fade in
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+        // Animated grid background pattern
+        const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+        graphics.fillStyle(0x2d5a3d, 0.15);
+        for (let y = 0; y < 720; y += 40) {
+          graphics.fillRect(0, y, 1280, 1);
+        }
+        for (let x = 0; x < 1280; x += 40) {
+          graphics.fillRect(x, 0, 1, 720);
+        }
+        graphics.generateTexture('gridTexture', 1280, 720);
+        graphics.destroy();
+        const gridBg = this.add.image(640, 360, 'gridTexture');
+        gridBg.setAlpha(0.5);
+
+        // Glowing orbs floating in the scene
+        for (let i = 0; i < 5; i++) {
+          const orbX = Phaser.Math.Between(200, 1080);
+          const orbY = Phaser.Math.Between(150, 550);
+          const orb = this.add.circle(orbX, orbY, 15, 0x7cb342, 0.4);
+          
+          this.tweens.add({
+            targets: orb,
+            x: orbX + Phaser.Math.Between(-100, 100),
+            y: orbY + Phaser.Math.Between(-100, 100),
+            duration: 4000 + i * 500,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+          });
+
+          this.tweens.add({
+            targets: orb,
+            alpha: { from: 0.6, to: 0.2 },
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+          });
+        }
+
+        const titleText = this.add.text(640, 320, 'Hub World', {
           fontFamily: 'Georgia, "Times New Roman", serif',
           fontSize: '36px',
           color: '#d4af37',
         }).setOrigin(0.5);
+
+        // Subtle scale pulse
+        this.tweens.add({
+          targets: titleText,
+          scaleX: { from: 1, to: 1.02 },
+          scaleY: { from: 1, to: 1.02 },
+          duration: 1500,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
 
         this.add.text(640, 380, '(stub)', {
           fontFamily: 'Arial, Helvetica, sans-serif',
           fontSize: '20px',
           color: '#c8d4c8',
         }).setOrigin(0.5);
+
+        // Ambient particle system
+        const ambient = this.add.particles(0xa1d82e);
+        ambient.createEmitter({
+          x: { min: 0, max: 1280 },
+          y: { min: 0, max: 720 },
+          speed: 0,
+          scale: { start: 0.2, end: 0 },
+          lifespan: 1500,
+          gravityY: -20,
+        });
+        this.time.addEvent({
+          delay: 300,
+          callback: () => ambient.emitParticleAt(
+            Phaser.Math.Between(100, 1180),
+            Phaser.Math.Between(100, 650),
+            1
+          ),
+          loop: true,
+        });
       }
     }
 
