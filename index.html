@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moss and Myth</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0d1510;
+    }
+
+    #game-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.0/dist/phaser.min.js"></script>
+  <script>
+    class StartScene extends Phaser.Scene {
+      constructor() {
+        super({ key: 'StartScene' });
+      }
+
+      preload() {
+        this.load.on('loaderror', (file) => {
+          if (file.key === 'startBg') {
+            this.bgMissing = true;
+          }
+        });
+        this.load.image('startBg', 'assets/start-screen-bg.png');
+      }
+
+      create() {
+        this.cameras.main.setBackgroundColor('#1a2e22');
+
+        if (this.textures.exists('startBg')) {
+          this.add.image(640, 360, 'startBg').setDisplaySize(1280, 720);
+        }
+
+        this.add.text(640, 180, 'MOSS AND MYTH', {
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontSize: '64px',
+          color: '#d4af37',
+          stroke: '#000000',
+          strokeThickness: 6,
+        }).setOrigin(0.5);
+
+        this.add.text(640, 260, 'A Tale of Shaivalapuri', {
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: '28px',
+          color: '#c8d4c8',
+        }).setOrigin(0.5);
+
+        this.clickPrompt = this.add.text(640, 580, '[ CLICK TO PLAY ]', {
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: '24px',
+          color: '#d4af37',
+        }).setOrigin(0.5);
+
+        this.tweens.add({
+          targets: this.clickPrompt,
+          alpha: { from: 1, to: 0.35 },
+          duration: 900,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+
+        this.input.once('pointerdown', () => {
+          this.scene.start('StoryCutscene');
+        });
+      }
+    }
+
+    class StoryCutscene extends Phaser.Scene {
+      constructor() {
+        super({ key: 'StoryCutscene' });
+      }
+
+      create() {
+        this.cameras.main.setBackgroundColor('#1a2e22');
+
+        this.add.text(640, 320, 'Story Cutscene', {
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontSize: '36px',
+          color: '#d4af37',
+        }).setOrigin(0.5);
+
+        this.add.text(640, 380, '(stub — click to continue)', {
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: '20px',
+          color: '#c8d4c8',
+        }).setOrigin(0.5);
+
+        this.input.once('pointerdown', () => {
+          this.scene.start('HubWorld');
+        });
+      }
+    }
+
+    class HubWorld extends Phaser.Scene {
+      constructor() {
+        super({ key: 'HubWorld' });
+      }
+
+      create() {
+        this.cameras.main.setBackgroundColor('#1a2e22');
+
+        this.add.text(640, 320, 'Hub World', {
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontSize: '36px',
+          color: '#d4af37',
+        }).setOrigin(0.5);
+
+        this.add.text(640, 380, '(stub)', {
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: '20px',
+          color: '#c8d4c8',
+        }).setOrigin(0.5);
+      }
+    }
+
+    const config = {
+      type: Phaser.AUTO,
+      width: 1280,
+      height: 720,
+      parent: 'game-container',
+      backgroundColor: '#1a2e22',
+      scene: [StartScene, StoryCutscene, HubWorld],
+    };
+
+    new Phaser.Game(config);
+  </script>
+</body>
+</html>
